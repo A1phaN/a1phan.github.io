@@ -1,7 +1,7 @@
-use chrono::prelude::*;
-use crate::components::Markdown;
-use gloo_net::http::Request;
 use super::Route;
+use crate::components::Markdown;
+use chrono::prelude::*;
+use gloo_net::http::Request;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -13,19 +13,22 @@ pub fn posts() -> Html {
   {
     let p = page.clone();
     let post_list = post_list.clone();
-    use_effect_with_deps(move |_| {
-      let post_list = post_list.clone();
-      wasm_bindgen_futures::spawn_local(async move {
-        let list: Vec<blog::utils::Post> = Request::get(&format!("/{}.json", *p))
-          .send()
-          .await
-          .unwrap()
-          .json()
-          .await
-          .unwrap();
-        post_list.set(list);
-      });
-    }, page);
+    use_effect_with_deps(
+      move |_| {
+        let post_list = post_list.clone();
+        wasm_bindgen_futures::spawn_local(async move {
+          let list: Vec<blog::utils::Post> = Request::get(&format!("/{}.json", *p))
+            .send()
+            .await
+            .unwrap()
+            .json()
+            .await
+            .unwrap();
+          post_list.set(list);
+        });
+      },
+      page,
+    );
   }
   let navigator = use_navigator().unwrap();
 
@@ -45,9 +48,10 @@ pub fn posts() -> Html {
                 <div>
                   {
                     format!(
-                      "Posted: {} | Updated: {}",
-                      Local.timestamp_opt(post.create as i64, 0).unwrap().format("%Y-%m-%d %H:%M:%S").to_string(),
-                      Local.timestamp_opt(post.modify as i64, 0).unwrap().format("%Y-%m-%d %H:%M:%S").to_string(),
+                      "发表于: {} | 更新于: {} | 字数: {}",
+                      Local.timestamp_opt(post.create as i64, 0).unwrap().format("%Y-%m-%d").to_string(),
+                      Local.timestamp_opt(post.modify as i64, 0).unwrap().format("%Y-%m-%d").to_string(),
+                      post.length,
                     )
                   }
                 </div>
@@ -75,19 +79,22 @@ pub fn post(props: &PostProps) -> Html {
   {
     let path = props.path.clone();
     let content = content.clone();
-    use_effect_with_deps(move |_| {
-      let content = content.clone();
-      wasm_bindgen_futures::spawn_local(async move {
-        let res: String = Request::get(&format!("/post/{}.md", &path))
-          .send()
-          .await
-          .unwrap()
-          .text()
-          .await
-          .unwrap();
-        content.set(res);
-      });
-    }, props.path.clone());
+    use_effect_with_deps(
+      move |_| {
+        let content = content.clone();
+        wasm_bindgen_futures::spawn_local(async move {
+          let res: String = Request::get(&format!("/post/{}.md", &path))
+            .send()
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+          content.set(res);
+        });
+      },
+      props.path.clone(),
+    );
   }
 
   html! {

@@ -11,7 +11,7 @@ use std::{
 
 fn main() -> Result<()> {
   let posts = Command::new("git").args(["ls-files", "post"]).output()?;
-  let posts = unsafe { String::from_utf8_unchecked(posts.stdout) }
+  let mut posts = unsafe { String::from_utf8_unchecked(posts.stdout) }
     .trim()
     .split("\n")
     .filter(|path| path.ends_with(".md"))
@@ -26,7 +26,12 @@ fn main() -> Result<()> {
         .expect(&format!("failed to parse {}", path.to_str().unwrap()));
       let path = path.to_str().unwrap();
       Post {
-        path: path.strip_prefix("post/").unwrap().strip_suffix(".md").unwrap().to_string(),
+        path: path
+          .strip_prefix("post/")
+          .unwrap()
+          .strip_suffix(".md")
+          .unwrap()
+          .to_string(),
         title: find_first_element(&mdast, |node| match node {
           Node::Heading(heading) => {
             if heading.depth == 1 {
@@ -75,6 +80,7 @@ fn main() -> Result<()> {
       }
     })
     .collect::<Vec<_>>();
+  posts.sort_by_key(|post| post.create);
   let meta = BuildMeta {
     timestamp: Local::now().timestamp(),
     post: posts.len(),
