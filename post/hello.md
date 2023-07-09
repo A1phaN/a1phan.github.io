@@ -104,5 +104,8 @@ pub fn markdown_component(props: &MarkdownProps) -> Html {
 }
 ```
 使用 `eval` 在任何情况下都是邪恶的，但是如果 `eval` 的内容是固定的，则可以被原谅（大嘘）。社区中我看到了 Prism 的 wasm 绑定，但是这些库几乎没有人用，也基本没有在活跃，使用这些库大约也不比直接 `eval` 更优雅罢。
-
+### 我在 Rust 项目中学习 React
+我原本一直以为 `useEffect` 是在加载 DOM 之前执行的，虽然现在仔细想想好像这样实现起来不是很合理，但直到我这里遇到需要确保副作用在 DOM 加载之后才运行的时候，我才去认真看了文档，发现 React 文档如此描述：
+> The function with your Effect’s logic. Your setup function may also optionally return a cleanup function. **When your component is added to the DOM, React will run your setup function.**
+## Flags
 另外还有更多的 feature 等待实现，关于这一部分 flag 可以参考 README，每当完成新的 flag 时我会在这里更新我的实现思路。

@@ -15,7 +15,7 @@ fn markdown_element(props: &MarkdownElementProps) -> Html {
   html! {
     { for props.children.iter().map(|child| match child {
       Node::Root(root) => html! { <MarkdownElement children={root.children.clone()} /> },
-      Node::BlockQuote(_) => html! {},
+      Node::BlockQuote(block_quote) => html! { <blockquote><MarkdownElement children={block_quote.children.clone()} /></blockquote>},
       Node::FootnoteDefinition(_) => html! {},
       Node::MdxJsxFlowElement(_) => html! {},
       Node::List(list) => if list.ordered {
