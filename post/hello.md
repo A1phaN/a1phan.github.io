@@ -54,4 +54,55 @@ jobs:
 
 不同的是 Yew 目前的生态与 React 相比还有欠缺，我没有找到可以与 [antd](https://ant.design/) 相比的适用于 Yew 的组件库，而且 [Yew 本身在 CSS 支持方面仍有许多不足](https://yew.rs/docs/more/css)，考虑到我目前还没有自己写一套组件库的动力，整个博客的 CSS （暂时）应当还没有很多，因此我决定直接把这些内容写在 `index.html` 中，虽然这并不优雅，但大约也可以使用相当长一段时间。
 
-另外还有更多的 Feature 等待实现，关于这一部分 flag 可以参考 README，每当完成新的 flag 时我会在这里更新我的实现思路。
+## 代码块高亮
+代码块高亮算是一个相对比较重要的 feature，因为我写的博客应该每一篇都会用到，但是在 Rust 当中没有找到适当的工具实现，最终找到一个比较简单的库是 [Prism](https://prismjs.com/)，这个库对框架的耦合很小，只要引入对应的 JS 和 CSS 文件，给代码块添加对应语言的 class 即可，例如：
+```html
+<pre>
+  <code class="language-rust">
+    /* some rust code here */
+  </code>
+</pre>
+```
+~~反正 `index.html` 里已经有很多东西，再加几行也可以容忍吧~~，作为参考，使用方法如下：
+```html
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@v1.x/themes/prism.css" rel="stylesheet" />
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@v1.x/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@v1.x/plugins/autoloader/prism-autoloader.min.js"></script>
+  </body>
+</html>
+```
+引入这些文件后就可以自动将上文所示的代码块高亮，但这一行为是通过 `DOMContentLoaded` 事件触发的，也就是说在做 CSR 时当 DOM 修改时这一事件并不会触发，因此需要在每次渲染代码块后重新触发 Prism 的高亮，简单来说可以实现为：
+```jsx
+function Post(props) {
+  useEffect(() => {
+    window.Prism.highlightAll();
+  });
+  
+  return <Markdown content={props.content} />;
+}
+```
+为了实现这一目标（尽管并不太优雅，但是已经是尽量减少对 Rust 代码的侵入了），我使用了如下方法：
+```rust
+use js_sys::eval;
+
+#[function_component(Markdown)]
+pub fn markdown_component(props: &MarkdownProps) -> Html {
+  let mdast = markdown::to_mdast(&props.content, &markdown::ParseOptions::default()).expect("");
+  use_effect(|| {
+    let _ = eval("window.Prism.highlightAll();");
+  });
+
+  html! {
+    if let Node::Root(root) = mdast {
+      <MarkdownElement children={root.children} />
+    }
+  }
+}
+```
+使用 `eval` 在任何情况下都是邪恶的，但是如果 `eval` 的内容是固定的，则可以被原谅（大嘘）。社区中我看到了 Prism 的 wasm 绑定，但是这些库几乎没有人用，也基本没有在活跃，使用这些库大约也不比直接 `eval` 更优雅罢。
+
+另外还有更多的 feature 等待实现，关于这一部分 flag 可以参考 README，每当完成新的 flag 时我会在这里更新我的实现思路。

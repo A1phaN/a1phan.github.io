@@ -74,6 +74,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "gloo-net 0.2.6",
+ "js-sys",
  "markdown",
  "serde",
  "serde_json",

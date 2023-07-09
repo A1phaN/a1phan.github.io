@@ -1,4 +1,5 @@
 use crate::router::Route;
+use js_sys::eval;
 use markdown::mdast::Node;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -51,7 +52,13 @@ fn markdown_element(props: &MarkdownElementProps) -> Html {
       Node::LinkReference(_) => html! {},
       Node::Strong(strong) => html! { <strong><MarkdownElement children={strong.children.clone()} /></strong> },
       Node::Text(text) => html! { text.value.clone() },
-      Node::Code(code) => html! { <pre><code>{ code.value.clone() }</code></pre>},
+      Node::Code(code) => html! {
+        <pre>
+          <code class={classes!(code.lang.as_ref().map(|lang| format!("language-{}", lang)))}>
+            { code.value.clone() }
+          </code>
+        </pre>
+      },
       Node::Math(_) => html! {},
       Node::MdxFlowExpression(_) => html! {},
       Node::Heading(heading) => {
@@ -86,6 +93,10 @@ pub struct MarkdownProps {
 pub fn markdown_component(props: &MarkdownProps) -> Html {
   // TODO: avoid parsing markdown every time
   let mdast = markdown::to_mdast(&props.content, &markdown::ParseOptions::default()).expect("");
+  use_effect(|| {
+    let _ = eval("window.Prism.highlightAll();");
+  });
+
   html! {
     if let Node::Root(root) = mdast {
       <MarkdownElement children={root.children} />
