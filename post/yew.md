@@ -1,3 +1,7 @@
++++
+category = "Learning"
+tags = ["Rust", "Yew"]
++++
 # Yew 踩坑笔记
 作为一个 React 忠实用户和 Rust 爱好者，使用 [Yew](https://yew.rs/) 看起来是一件理所当然的事情，在我尝试实现这个前端之前我也认为这个学习过程应当非常简单，但实际上还是会遇到许多奇妙的问题，在这里记录我已经和即将遇到的问题。
 ## 开发环境
@@ -34,7 +38,7 @@ let content = use_state_eq(String::new);
   );
 }
 ```
-这里需要多次复制 `content`（应该只是复制了 `UseStateHandle<String>` 的壳）来确保 `content` 的所有权不会移动，而在 React 当中则不必如此。
+这里需要多次复制 `content`（应该只是复制了 `UseStateHandle<String>` 的壳，但如果 `content` 来自于 Props 则无法避免）来确保 `content` 的所有权不会移动，而在 React 当中则不必如此。
 
 另一个比较棘手的问题是函数组件的参数，由于参数必须实现 `Properties` trait，而它又依赖于 `ImplicitClone` trait，这导致如果外部类型没有实现 `ImplicitClone`，将会导致无法将这种类型用在组件参数中，这应该是由于语言特性导致的，JavaScript 当中所有的对象都相当于计数引用，在传递和比较更新时都只需要对比引用，而在 Rust 当中由于生命周期的存在，一个数据的引用不能任意传递，导致要实现相同的功能需要构造更复杂的数据结构，例如使用 `std::rc::Rc` 等方式实现引用计数。
 

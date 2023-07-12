@@ -17,7 +17,7 @@ pub fn posts() -> Html {
       move |_| {
         let post_list = post_list.clone();
         wasm_bindgen_futures::spawn_local(async move {
-          let list: Vec<blog::utils::Post> = Request::get(&format!("/{}.json", *p))
+          let list: Vec<blog::types::Post> = Request::get(&format!("/{}.json", *p))
             .send()
             .await
             .unwrap()
@@ -48,10 +48,25 @@ pub fn posts() -> Html {
                 <div>
                   {
                     format!(
-                      "发表于: {} | 更新于: {} | 字数: {}",
+                      "发表于: {} | 更新于: {} | 字数: {} | 分类: {}{}",
                       Local.timestamp_opt(post.create as i64, 0).unwrap().format("%Y-%m-%d").to_string(),
                       Local.timestamp_opt(post.modify as i64, 0).unwrap().format("%Y-%m-%d").to_string(),
                       post.length,
+                      post.meta.category,
+                      if post.meta.tags.len() > 0 {
+                        format!(
+                          "| 标签: {}",
+                          post
+                            .meta
+                            .tags
+                            .iter()
+                            .map(|tag| tag.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                        )
+                      } else {
+                        "".to_string()
+                      }
                     )
                   }
                 </div>

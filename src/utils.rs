@@ -1,21 +1,4 @@
-use markdown::mdast::Node;
-use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Copy, Deserialize, Serialize, PartialEq)]
-pub struct BuildMeta {
-  pub timestamp: i64,
-  pub post: usize,
-}
-
-#[derive(Deserialize, Serialize, PartialEq)]
-pub struct Post {
-  pub path: String,
-  pub title: String,
-  pub image: Option<String>,
-  pub length: usize,
-  pub create: usize,
-  pub modify: usize,
-}
+use markdown::{mdast::Node, Constructs, ParseOptions};
 
 pub fn find_first_element<T>(node: &Node, predict: fn(node: &Node) -> Option<T>) -> Option<T> {
   if let Some(elem) = predict(node) {
@@ -43,5 +26,16 @@ pub fn get_text(node: &Node) -> String {
       }
     }
     text
+  }
+}
+
+pub fn parse_options() -> ParseOptions {
+  ParseOptions {
+    constructs: Constructs {
+      frontmatter: true,
+      gfm_table: true,
+      ..Default::default()
+    },
+    ..Default::default()
   }
 }

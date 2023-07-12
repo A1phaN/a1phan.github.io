@@ -1,9 +1,13 @@
-use blog::utils::{find_first_element, get_text, BuildMeta, Post};
+use blog::{
+  types::{BuildMeta, Category, Post, PostMeta, Tag},
+  utils::{find_first_element, get_text},
+};
 use chrono::prelude::*;
 use markdown::mdast::Node;
 use std::io::Write;
 use std::{
-  fs::File,
+  collections::HashMap,
+  fs::{self, File},
   io::{Read, Result},
   path::Path,
   process::Command,
@@ -77,21 +81,60 @@ fn main() -> Result<()> {
         }
         .parse()
         .expect("invalid modify time"),
+        meta: find_first_element(&mdast, |node| match node {
+          Node::Toml(toml) => Some(toml.value.clone()),
+          _ => None,
+        })
+        .map(|meta| toml::from_str::<PostMeta>(&meta).unwrap())
+        .unwrap_or_else(|| PostMeta {
+          category: Category::Unclassified,
+          tags: vec![],
+        }),
       }
     })
     .collect::<Vec<_>>();
   posts.sort_by_key(|post| post.create);
-  let meta = BuildMeta {
+  let mut meta = BuildMeta {
     timestamp: Local::now().timestamp(),
     post: posts.len(),
+    category: HashMap::new(),
+    tag: HashMap::new(),
   };
 
-  File::create(&Path::new("dist/meta.json"))?
-    .write_all(serde_json::to_string(&meta)?.as_bytes())?;
   for (idx, page) in posts.chunks(10).enumerate() {
     File::create(&Path::new(&format!("dist/{}.json", idx + 1)))?
       .write_all(serde_json::to_string(page)?.as_bytes())?;
   }
+  for category in Category::values() {
+    let posts = posts
+      .iter()
+      .filter(|post| post.meta.category == category)
+      .collect::<Vec<_>>();
+    meta.category.insert(category, posts.len());
+    for (idx, page) in posts.chunks(10).enumerate() {
+      fs::create_dir_all(&Path::new(&format!("dist/category/{}", category)))?;
+      File::create(&Path::new(&format!(
+        "dist/category/{}/{}.json",
+        category,
+        idx + 1,
+      )))?
+      .write_all(serde_json::to_string(page)?.as_bytes())?;
+    }
+  }
+  for tag in Tag::values() {
+    let posts = posts
+      .iter()
+      .filter(|post| post.meta.tags.contains(&tag))
+      .collect::<Vec<_>>();
+    meta.tag.insert(tag, posts.len());
+    for (idx, page) in posts.chunks(10).enumerate() {
+      fs::create_dir_all(&Path::new(&format!("dist/tag/{}", tag)))?;
+      File::create(&Path::new(&format!("dist/tag/{}/{}.json", tag, idx + 1)))?
+        .write_all(serde_json::to_string(page)?.as_bytes())?;
+    }
+  }
+  File::create(&Path::new("dist/meta.json"))?
+    .write_all(serde_json::to_string(&meta)?.as_bytes())?;
 
   Ok(())
 }

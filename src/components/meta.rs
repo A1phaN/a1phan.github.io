@@ -1,4 +1,4 @@
-use blog::utils::BuildMeta;
+use blog::types::BuildMeta;
 use gloo_net::http::Request;
 use yew::prelude::*;
 
@@ -9,10 +9,7 @@ pub struct MetaProviderProps {
 
 #[function_component(MetaProvider)]
 pub fn meta_provider(props: &MetaProviderProps) -> Html {
-  let meta = use_state_eq(|| BuildMeta {
-    timestamp: 0,
-    post: 0,
-  });
+  let meta = use_state_eq(BuildMeta::default);
   {
     let meta = meta.clone();
     use_effect_with_deps(
@@ -34,7 +31,7 @@ pub fn meta_provider(props: &MetaProviderProps) -> Html {
   }
 
   html! {
-    <ContextProvider<BuildMeta> context={*meta}>
+    <ContextProvider<BuildMeta> context={(*meta).clone()}>
       { for props.children.iter() }
     </ContextProvider<BuildMeta>>
   }
