@@ -131,7 +131,7 @@ pub fn markdown_component(props: &MarkdownProps) -> Html {
 ## 分类和标签
 常见的博客功能，模仿 Hexo 的设计，通过在博文的 markdown 文件中加入一些元数据使预处理过程能够将博文进行分类和标记，同时我导出了每个分类和标签的博文的清单，这样就可以实现分类查看，但是前端还没有实现。
 
-这里首先学到的是 markdown 扩展语法，在实现 markdown 渲染器时就已经注意到有很多我没有使用过也不太清楚是什么的元素，例如 Toml 和 Yaml 等（此前我以为 Hexo 实现的 Yaml 元数据是自定义语法），但查找相关资料时我才知道有更多的 markdown 扩展语法。对于 markdown-rs 来说，使用如下的解析选项可以得到我需要的信息：
+这里首先学到的是 markdown 扩展语法，在实现 markdown 渲染器时就已经注意到有很多我没有使用过也不太清楚是什么的元素，例如 Toml 和 Yaml 等（此前我以为 Hexo 实现的 Yaml 元数据是自定义语法），但查找相关资料时我才知道有更多的 markdown 扩展语法。因此无需做多余的定义即可使用 Toml 作为元数据的声明语法。对于 markdown-rs 来说，使用如下的解析选项可以得到我需要的信息：
 ```rust
 pub fn parse_options() -> ParseOptions {
   ParseOptions {

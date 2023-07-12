@@ -60,7 +60,7 @@ pub fn posts() -> Html {
                             .meta
                             .tags
                             .iter()
-                            .map(|tag| tag.to_string())
+                            .map(|tag| format!("{tag}"))
                             .collect::<Vec<_>>()
                             .join(", ")
                         )
