@@ -8,9 +8,10 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use about::About;
+use blog::types::{Category, Tag};
 use home::Home;
 use not_found::NotFound;
-use posts::{Post, Posts};
+use posts::{CategoryPosts, Post, Posts, TagPosts};
 
 #[derive(Clone, Debug, PartialEq, Routable)]
 pub enum Route {
@@ -20,6 +21,10 @@ pub enum Route {
   About,
   #[at("/posts")]
   Posts,
+  #[at("/posts/category/*category")]
+  Category { category: Category },
+  #[at("/posts/tag/*tag")]
+  Tag { tag: Tag },
   #[at("/post/*path")]
   Post { path: String },
   #[not_found]
@@ -36,6 +41,8 @@ pub fn switch(route: Route) -> Html {
             Route::Home => html! { <Home /> },
             Route::About => html! { <About /> },
             Route::Posts => html! { <Posts /> },
+            Route::Category { category } => html! { <CategoryPosts {category} /> },
+            Route::Tag { tag } => html! { <TagPosts {tag} /> },
             Route::Post { path } => html! { <Post {path} /> },
             Route::NotFound => html! { <NotFound /> },
           }

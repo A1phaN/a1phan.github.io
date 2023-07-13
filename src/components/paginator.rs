@@ -10,7 +10,11 @@ pub struct PaginatorProps {
 #[function_component(Paginator)]
 pub fn paginator(props: &PaginatorProps) -> Html {
   let min = if props.page > 2 { props.page - 2 } else { 1 };
-  let max = if props.page + 2 < props.total { props.page + 2 } else { props.total };
+  let max = if props.page + 2 < props.total {
+    props.page + 2
+  } else {
+    props.total
+  };
   let set_page = |page: usize| {
     let set_page = props.set_page.clone();
     move |_| set_page.emit(page)

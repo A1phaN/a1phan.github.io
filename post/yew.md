@@ -41,5 +41,28 @@ let content = use_state_eq(String::new);
 这里需要多次复制 `content`（应该只是复制了 `UseStateHandle<String>` 的壳，但如果 `content` 来自于 Props 则无法避免）来确保 `content` 的所有权不会移动，而在 React 当中则不必如此。
 
 另一个比较棘手的问题是函数组件的参数，由于参数必须实现 `Properties` trait，而它又依赖于 `ImplicitClone` trait，这导致如果外部类型没有实现 `ImplicitClone`，将会导致无法将这种类型用在组件参数中，这应该是由于语言特性导致的，JavaScript 当中所有的对象都相当于计数引用，在传递和比较更新时都只需要对比引用，而在 Rust 当中由于生命周期的存在，一个数据的引用不能任意传递，导致要实现相同的功能需要构造更复杂的数据结构，例如使用 `std::rc::Rc` 等方式实现引用计数。
+## 路由
+Yew 官方提供了 yew-router crate 作为路由组件，其设计思路和使用起来也非常类似于 react-router，在使用上比 react-router 有一个显著的好处是由于 yew-router 的路由及其参数是定义好的：
+```rust
+#[derive(Clone, Debug, PartialEq, Routable)]
+pub enum Route {
+  #[at("/")]
+  Home,
+  #[at("/about")]
+  About,
+  #[at("/posts")]
+  Posts,
+  #[at("/posts/category/*category")]
+  Category { category: Category },
+  #[at("/posts/tag/*tag")]
+  Tag { tag: Tag },
+  #[at("/post/*path")]
+  Post { path: String },
+  #[not_found]
+  #[at("/404")]
+  NotFound,
+}
+```
+因此可以直接解析实现了 `FromStr` trait 的类型，如上述的 `Category` 和 `Tag`，同时在指定跳转目标时也可以确保不会出错（而 react-router 是自己写字符串跳转到目标地址，相对而言更有可能出错）。这里有个小疑问是跳转到目标地址时应该还是需要将路由的对象转换为新的目标地址的，也就是说有一个 `ToStr` 的过程，不知道这个 `ToStr` 具体是在哪个 trait 中实现，如果 `ToStr` 和 `FromStr` 实现不同会导致什么问题。
 
 此外吐槽的一个小点是 Yew 官方文档对于 hook 的介绍十分语焉不详，比如对于 `state` 的使用，官方文档中使用的例子是 `usize` 类型的数据，但 `usize` 实现了 `Copy` trait，这导致很多用法对于其他类型是不通用的。而这个即使数据没有改变仍然会导致重新渲染的 `use_state` hook 我并没有理解，虽然有可能仍然与语言特性有关，但是如果官方文档能给出一个例子就更好了。

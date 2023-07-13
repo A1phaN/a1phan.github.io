@@ -52,7 +52,10 @@ pub fn layout(props: &LayoutProps) -> Html {
             to={Route::About.clone()}
           />
           <NavbarItem
-            active={matches!(props.active, Route::Posts | Route::Post { .. })}
+            active={matches!(
+              props.active,
+              Route::Posts | Route::Category { .. } | Route::Tag { .. } | Route::Post { .. }
+            )}
             label="Posts"
             to={Route::Posts.clone()}
           />
@@ -62,7 +65,7 @@ pub fn layout(props: &LayoutProps) -> Html {
         class={classes!(
           "content",
           match props.active {
-            Route::Posts => None,
+            Route::Posts | Route::Category { .. } | Route::Tag { .. } => None,
             _ => Some("ordered-headings")
           }
         )}

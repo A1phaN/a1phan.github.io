@@ -2,9 +2,10 @@ use serde::{Deserialize, Serialize};
 use std::{
   collections::HashMap,
   fmt::{Display, Formatter},
+  str::FromStr,
 };
 
-#[derive(Clone, Copy, Deserialize, Eq, Hash, Serialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub enum Category {
   Learning,
@@ -36,6 +37,21 @@ impl Display for Category {
   }
 }
 
+impl FromStr for Category {
+  type Err = ();
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s {
+      "Learning" => Ok(Self::Learning),
+      "Developing" => Ok(Self::Developing),
+      "Debugging" => Ok(Self::Debugging),
+      "Hacking" => Ok(Self::Hacking),
+      "Unclassified" => Ok(Self::Unclassified),
+      _ => Err(()),
+    }
+  }
+}
+
 impl Category {
   pub fn values() -> Vec<Self> {
     vec![
@@ -48,7 +64,7 @@ impl Category {
   }
 }
 
-#[derive(Clone, Copy, Deserialize, Eq, Hash, Serialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub enum Tag {
   Blog,
@@ -70,13 +86,26 @@ impl Display for Tag {
   }
 }
 
+impl FromStr for Tag {
+  type Err = ();
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s {
+      "Blog" => Ok(Self::Blog),
+      "Rust" => Ok(Self::Rust),
+      "Yew" => Ok(Self::Yew),
+      _ => Err(()),
+    }
+  }
+}
+
 impl Tag {
   pub fn values() -> Vec<Self> {
     vec![Self::Blog, Self::Rust, Self::Yew]
   }
 }
 
-#[derive(Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct PostMeta {
   #[serde(default)]
   pub category: Category,
@@ -84,7 +113,7 @@ pub struct PostMeta {
   pub tags: Vec<Tag>,
 }
 
-#[derive(Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct Post {
   pub path: String,
   pub title: String,
@@ -95,7 +124,7 @@ pub struct Post {
   pub meta: PostMeta,
 }
 
-#[derive(Clone, Default, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq)]
 pub struct BuildMeta {
   pub timestamp: i64,
   pub post: usize,
