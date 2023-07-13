@@ -97,6 +97,26 @@
         text-decoration: inherit;
       }
     </style>
+    <style>
+      .post-list-pagination {
+        float: right;
+      }
+      .post-list-pagination button {
+        background: none;
+        border: none;
+      }
+      .post-list-pagination button:disabled {
+        width: 30px;
+        height: 30px;
+        color: rgba(0, 0, 0, 0.25);
+      }
+      .post-list-pagination button.active-page {
+        border: 1px solid #1677ff;
+        border-radius: 6px;
+        color: black;
+        font-weight: 500;
+      }
+    </style>
     <link data-trunk rel="rust" data-bin="blog" />
     <link href="https://cdn.jsdelivr.net/npm/prismjs@v1.x/themes/prism.css" rel="stylesheet" />
   </head>

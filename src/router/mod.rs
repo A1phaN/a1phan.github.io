@@ -36,7 +36,7 @@ pub fn switch(route: Route) -> Html {
             Route::Home => html! { <Home /> },
             Route::About => html! { <About /> },
             Route::Posts => html! { <Posts /> },
-            Route::Post { path } => html! { <Post path={path} /> },
+            Route::Post { path } => html! { <Post {path} /> },
             Route::NotFound => html! { <NotFound /> },
           }
         }

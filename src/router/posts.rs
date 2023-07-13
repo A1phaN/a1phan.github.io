@@ -1,5 +1,6 @@
 use super::Route;
-use crate::components::Markdown;
+use crate::components::{Markdown, Paginator};
+use blog::types::BuildMeta;
 use chrono::prelude::*;
 use gloo_net::http::Request;
 use yew::prelude::*;
@@ -7,6 +8,7 @@ use yew_router::prelude::*;
 
 #[function_component(Posts)]
 pub fn posts() -> Html {
+  let meta = use_context::<BuildMeta>().expect("BuildMeta not found");
   let page = use_state_eq(|| 1);
   // TODO: Add post list cache
   let post_list = use_state_eq(|| vec![]);
@@ -27,10 +29,14 @@ pub fn posts() -> Html {
           post_list.set(list);
         });
       },
-      page,
+      *page,
     );
   }
   let navigator = use_navigator().unwrap();
+  let set_page = {
+    let page = page.clone();
+    Callback::from(move |p: usize| page.set(p))
+  };
 
   html! {
     <div>
@@ -55,7 +61,7 @@ pub fn posts() -> Html {
                       post.meta.category,
                       if post.meta.tags.len() > 0 {
                         format!(
-                          "| 标签: {}",
+                          " | 标签: {}",
                           post
                             .meta
                             .tags
@@ -77,7 +83,7 @@ pub fn posts() -> Html {
         </ul>
       </div>
       <div class={classes!("post-list-pagination")}>
-        // TODO: Pagination
+        <Paginator page={*page} total={(meta.post + 9) / 10} {set_page} />
       </div>
     </div>
   }
