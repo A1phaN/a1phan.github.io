@@ -98,8 +98,9 @@ fn main() -> Result<()> {
     tag: HashMap::new(),
   };
 
+  fs::create_dir_all(&Path::new("meta"))?;
   for (idx, page) in posts.chunks(10).enumerate() {
-    File::create(&Path::new(&format!("dist/{}.json", idx + 1)))?
+    File::create(&Path::new(&format!("meta/{}.json", idx + 1)))?
       .write_all(serde_json::to_string(page)?.as_bytes())?;
   }
   for category in Category::values() {
@@ -109,9 +110,9 @@ fn main() -> Result<()> {
       .collect::<Vec<_>>();
     meta.category.insert(category, posts.len());
     for (idx, page) in posts.chunks(10).enumerate() {
-      fs::create_dir_all(&Path::new(&format!("dist/category/{}", category)))?;
+      fs::create_dir_all(&Path::new(&format!("meta/category/{}", category)))?;
       File::create(&Path::new(&format!(
-        "dist/category/{}/{}.json",
+        "meta/category/{}/{}.json",
         category,
         idx + 1,
       )))?
@@ -125,12 +126,12 @@ fn main() -> Result<()> {
       .collect::<Vec<_>>();
     meta.tag.insert(tag, posts.len());
     for (idx, page) in posts.chunks(10).enumerate() {
-      fs::create_dir_all(&Path::new(&format!("dist/tag/{}", tag)))?;
-      File::create(&Path::new(&format!("dist/tag/{}/{}.json", tag, idx + 1)))?
+      fs::create_dir_all(&Path::new(&format!("meta/tag/{}", tag)))?;
+      File::create(&Path::new(&format!("meta/tag/{}/{}.json", tag, idx + 1)))?
         .write_all(serde_json::to_string(page)?.as_bytes())?;
     }
   }
-  File::create(&Path::new("dist/meta.json"))?
+  File::create(&Path::new("meta/meta.json"))?
     .write_all(serde_json::to_string(&meta)?.as_bytes())?;
 
   Ok(())

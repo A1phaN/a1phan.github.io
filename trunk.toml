@@ -1,0 +1,7 @@
+[watch]
+watch = ["index.html", "post", "src", "style"]
+
+[[hooks]]
+stage = "pre_build"
+command = "cargo"
+command_arguments = ["run", "--bin", "generate_index"]

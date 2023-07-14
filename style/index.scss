@@ -1,0 +1,136 @@
+body {
+  margin: 0;
+}
+.layout {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #f5f5f5;
+}
+.header {
+  position: fixed;
+  height: 64px;
+  width: 80vw;
+  background-color: white;
+  padding: 0 10vw;
+
+  .navbar {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    list-style-type: none;
+
+    .navbar-item {
+      line-height: 62px;
+      margin-inline: 16px;
+      border-bottom-width: 2px;
+      border-bottom-style: solid;
+      border-bottom-color: white;
+      transition: border-bottom-color 0.3s;
+
+      a {
+        color: black;
+        text-decoration: none;
+
+        &.active-item {
+          color: #1677ff;
+        }
+      }
+
+      &.active-item {
+        border-bottom-color: #1677ff;
+      }
+
+      &:hover {
+        border-bottom-color: #1677ff;
+        transition: border-bottom-color 0.3s;
+      }
+    }
+  }
+}
+
+.content {
+  padding: 64px 10vw 0;
+  font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji';
+
+  h1 {
+    font-size: 38px;
+    font-weight: bold;
+    line-height: 1.1;
+    counter-reset: h2;
+  }
+
+  h2 {
+    font-size: 30px;
+  }
+
+  h3 {
+    font-size: 24px;
+  }
+
+  h4 {
+    font-size: 20px;
+  }
+
+  .ordered-headings {
+    h2:before h3:before h4:before {
+      padding-right: 1em;
+    }
+
+    h2:before {
+      counter-increment: h2;
+      content: counter(h2);
+      counter-reset: h3;
+    }
+    h3:before {
+      counter-increment: h3;
+      content: counter(h2) "." counter(h3);
+      counter-reset: h4;
+    }
+    h4:before {
+      counter-increment: h4;
+      content: counter(h2) "." counter(h3) "." counter(h4);
+    }
+  }
+
+  blockquote {
+    border-color: #ccc #ccc #ccc lightblue;
+    border-width: 1px 1px 1px 5px;
+    border-style: solid;
+    border-radius: 3px;
+    margin: 0;
+    padding: 1em 40px;
+    background-color: #f5f2f0;
+  }
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+
+.post-list-pagination {
+  float: right;
+
+  button {
+    background: none;
+    border: none;
+
+    &:disabled {
+      width: 30px;
+      height: 30px;
+      color: rgba(0, 0, 0, 0.25);
+    }
+
+    &.active-page {
+      border: 1px solid #1677ff;
+      border-radius: 6px;
+      color: #1677ff;
+      font-weight: 500;
+    }
+  }
+}

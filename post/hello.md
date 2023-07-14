@@ -40,8 +40,6 @@ jobs:
       - name: Build
         run: |
           trunk build --release
-          cargo run --bin generate_index
-          cp -r post dist/
           cp dist/index.html dist/404.html
       - name: Setup Pages
         uses: actions/configure-pages@v3
@@ -56,7 +54,11 @@ jobs:
 
 比 Node.js 好的一点是，我可以写一个单独的可执行程序（`src/bin/generate_index.rs`）来完成必要的预处理工作，这比上一个版本中执行 `node generate_index.js` 看起来要优雅一些，而且便于与博客的其他部分共用类型定义等内容。
 
-不同的是 Yew 目前的生态与 React 相比还有欠缺，我没有找到可以与 [antd](https://ant.design/) 相比的适用于 Yew 的组件库，而且 [Yew 本身在 CSS 支持方面仍有许多不足](https://yew.rs/docs/more/css)，考虑到我目前还没有自己写一套组件库的动力，整个博客的 CSS（暂时）应当还没有很多，因此我决定直接把这些内容写在 `index.html` 中，虽然这并不优雅，但大约也可以使用相当长一段时间。
+不同的是 Yew 目前的生态与 React 相比还有欠缺，我没有找到可以与 [antd](https://ant.design/) 相比的适用于 Yew 的组件库，而且 [Yew 本身在 CSS 支持方面仍有许多不足](https://yew.rs/docs/more/css)，~~考虑到我目前还没有自己写一套组件库的动力，整个博客的 CSS（暂时）应当还没有很多，因此我决定直接把这些内容写在 `index.html` 中，虽然这并不优雅，但大约也可以使用相当长一段时间~~。应该说我还是错怪了 trunk，虽然它提供的打包能力相比与 webpack 肯定还有很大的差距，但至少提供了编译 SASS / SCSS 的能力，因此我实际上不必将 CSS 都写在 `index.html` 中，而是只需要添加一句：
+```html
+<link data-trunk href="./style.scss" rel="scss" />
+```
+另外通过配置 trunk 的拷贝资源文件夹和构建 hook，我将构建过程精简到只需要一句 `trunk build --release`（为了使 GitHub 能够正确跳转，还复制了 `404.html`），这样在开发过程中就不必每次修改代码之后都手动运行 generate_index 脚本并复制内容了，这极大改善了我的开发舒适度（但目前观察到修改一个文件之后似乎 trunk 会重复编译多次，原因未知，也有可能和 CLion 的文件保存机制有关，不得不说 CLion 还是会做一些多余的写入操作）。
 ## markdown 渲染
 作为一个简单的博客框架，毫无疑问我选择了 markdown 作为实际撰写内容使用的标记语言，但在 Yew 当中并没有类似于我之前使用的 [markdown 渲染工具](https://remarkjs.github.io/react-markdown/)，我能找到的最贴近我用途的库是 [markdown-rs](https://github.com/wooorm/markdown-rs)，这个库提供了 HTML 渲染功能，但渲染的结果是字符串，因此如果我不想写 `innerHTML={markdown::to_html(content)}` 这样的东西，就只能自己实现渲染组件。
 

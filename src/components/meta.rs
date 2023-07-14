@@ -16,7 +16,7 @@ pub fn meta_provider(props: &MetaProviderProps) -> Html {
       move |_| {
         let meta = meta.clone();
         wasm_bindgen_futures::spawn_local(async move {
-          let fetched_meta: BuildMeta = Request::get("/meta.json")
+          let fetched_meta: BuildMeta = Request::get("/meta/meta.json")
             .send()
             .await
             .unwrap()

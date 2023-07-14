@@ -23,7 +23,7 @@ pub fn post_list(props: &PostListProps) -> Html {
       move |_| {
         let post_list = post_list.clone();
         wasm_bindgen_futures::spawn_local(async move {
-          let list: Vec<blog::types::Post> = Request::get(&format!("{}{}.json", path, *p))
+          let list: Vec<blog::types::Post> = Request::get(&format!("/meta{}{}.json", path, *p))
             .send()
             .await
             .unwrap()
