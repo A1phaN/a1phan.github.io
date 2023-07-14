@@ -22,10 +22,11 @@ fn main() -> Result<()> {
     .map(Path::new)
     .map(|path| {
       let mut content = String::new();
-      let length = File::open(path)
+      File::open(path)
         .expect(&format!("failed to open file {}", path.to_str().unwrap()))
         .read_to_string(&mut content)
         .expect(&format!("failed to read file {}", path.to_str().unwrap()));
+      let length = content.chars().count();
       let mdast = markdown::to_mdast(&content, &parse_options())
         .expect(&format!("failed to parse {}", path.to_str().unwrap()));
       let path = path.to_str().unwrap();
