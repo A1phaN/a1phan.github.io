@@ -1,4 +1,5 @@
 /.idea
 /dist
-/meta
+/meta/*
+!/meta/.keep
 /target
