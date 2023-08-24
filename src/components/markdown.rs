@@ -5,32 +5,19 @@ use markdown::mdast::Node;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-#[derive(Properties, PartialEq)]
-struct MarkdownElementProps {
-  // FIXME: This cause too many vector clones and should be fixed by updating markdown crate.
-  pub children: Vec<Node>,
-}
-
-#[function_component(MarkdownElement)]
-fn markdown_element(props: &MarkdownElementProps) -> Html {
+fn markdown_element(props: &Vec<Node>) -> Html {
   html! {
-    { for props.children.iter().map(|child| match child {
-      Node::Root(root) => html! { <MarkdownElement children={root.children.clone()} /> },
-      Node::BlockQuote(block_quote) => html! { <blockquote><MarkdownElement children={block_quote.children.clone()} /></blockquote>},
+    { for props.iter().map(|child| match child {
+      Node::Root(root) => markdown_element(&root.children),
+      Node::BlockQuote(block_quote) => html! {
+        <blockquote>{markdown_element(&block_quote.children)}</blockquote>
+      },
       Node::FootnoteDefinition(_) => html! {},
       Node::MdxJsxFlowElement(_) => html! {},
       Node::List(list) => if list.ordered {
-        html! {
-          <ol>
-            <MarkdownElement children={list.children.clone()} />
-          </ol>
-        }
+        html! { <ol>{markdown_element(&list.children)}</ol> }
       } else {
-        html! {
-          <ul>
-            <MarkdownElement children={list.children.clone()} />
-          </ul>
-        }
+        html! { <ul>{markdown_element(&list.children)}</ul> }
       },
       Node::MdxjsEsm(_) => html! {},
       Node::Toml(_) => html! { /* meta data of blog */ },
@@ -38,8 +25,8 @@ fn markdown_element(props: &MarkdownElementProps) -> Html {
       Node::Break(_) => html! { <br /> },
       Node::InlineCode(inline_code) => html! { <code>{ inline_code.value.clone() }</code> },
       Node::InlineMath(_) => html! {},
-      Node::Delete(delete) => html! { <del><MarkdownElement children={delete.children.clone()} /></del> },
-      Node::Emphasis(emphasis) => html! { <em><MarkdownElement children={emphasis.children.clone()} /></em> },
+      Node::Delete(delete) => html! { <del>{markdown_element(&delete.children)}</del> },
+      Node::Emphasis(emphasis) => html! { <em>{markdown_element(&emphasis.children)}</em> },
       Node::MdxTextExpression(_) => html! {},
       Node::FootnoteReference(_) => html! {},
       Node::Html(htm) => html! { <div innerHTML={htm.value.clone()} /> },
@@ -47,11 +34,11 @@ fn markdown_element(props: &MarkdownElementProps) -> Html {
       Node::ImageReference(_) => html! {},
       Node::MdxJsxTextElement(_) => html! {},
       Node::Link(link) => match Route::recognize(&link.url).unwrap() {
-        Route::NotFound => html! { <a href={link.url.clone()}><MarkdownElement children={link.children.clone()} /></a> },
-        route => html! { <Link<Route> to={route}><MarkdownElement children={link.children.clone()} /></Link<Route>> },
+        Route::NotFound => html! { <a href={link.url.clone()}>{markdown_element(&link.children)}</a> },
+        route => html! { <Link<Route> to={route}>{markdown_element(&link.children)}</Link<Route>> },
       },
       Node::LinkReference(_) => html! {},
-      Node::Strong(strong) => html! { <strong><MarkdownElement children={strong.children.clone()} /></strong> },
+      Node::Strong(strong) => html! { <strong>{markdown_element(&strong.children)}</strong> },
       Node::Text(text) => html! { text.value.clone() },
       Node::Code(code) => html! {
         <pre>
@@ -63,7 +50,7 @@ fn markdown_element(props: &MarkdownElementProps) -> Html {
       Node::Math(_) => html! {},
       Node::MdxFlowExpression(_) => html! {},
       Node::Heading(heading) => {
-        let children = html! { <MarkdownElement children={heading.children.clone()} /> };
+        let children = markdown_element(&heading.children);
         match heading.depth {
           1 => html! { <h1>{children}</h1> },
           2 => html! { <h2>{children}</h2> },
@@ -79,23 +66,23 @@ fn markdown_element(props: &MarkdownElementProps) -> Html {
           <table>
             <tr>
               { for tr.children.iter().map(|th| html! {
-                <th>
-                  if let Node::TableCell(th) = th {
-                    <MarkdownElement children={th.children.clone()} />
-                  }
-                </th>
+                if let Node::TableCell(th) = th {
+                  <th>
+                    {markdown_element(&th.children)}
+                  </th>
+                }
               }) }
             </tr>
-            <MarkdownElement children={Vec::from(table.children.get(1..table.children.len()).unwrap())} />
+            {markdown_element(&Vec::from(table.children.get(1..table.children.len()).unwrap()))}
           </table>
         }
       },
       Node::ThematicBreak(_) => html! { <hr /> },
-      Node::TableRow(table_row) => html! { <tr><MarkdownElement children={table_row.children.clone()} /></tr> },
-      Node::TableCell(table_cell) => html! { <td><MarkdownElement children={table_cell.children.clone()} /></td> },
-      Node::ListItem(list_item) => html! { <li><MarkdownElement children={list_item.children.clone()} /></li> },
+      Node::TableRow(table_row) => html! { <tr>{markdown_element(&table_row.children)}</tr> },
+      Node::TableCell(table_cell) => html! { <td>{markdown_element(&table_cell.children)}</td> },
+      Node::ListItem(list_item) => html! { <li>{markdown_element(&list_item.children)}</li> },
       Node::Definition(_) => html! {},
-      Node::Paragraph(paragraph) => html! { <p><MarkdownElement children={paragraph.children.clone()} /></p> },
+      Node::Paragraph(paragraph) => html! { <p>{markdown_element(&paragraph.children)}</p> },
     }) }
   }
 }
@@ -129,9 +116,9 @@ pub fn markdown_component(props: &MarkdownProps) -> Html {
     let _ = eval("window.Prism.highlightAll();");
   });
 
-  html! {
-    if let Node::Root(root) = (*mdast).clone() {
-      <MarkdownElement children={root.children} />
-    }
+  if let Node::Root(root) = (*mdast).clone() {
+    markdown_element(&root.children)
+  } else {
+    html! {}
   }
 }

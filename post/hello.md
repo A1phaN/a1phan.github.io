@@ -76,7 +76,25 @@ fn markdown_element(props: &MarkdownElementProps) -> Html {
 }
 ```
 
-这带来的额外好处是可以完全自定义各种节点的实现方式，而不必像 react-markdown 那样注册替代品。
+这带来的额外好处是可以完全自定义各种节点的实现方式，而不必像 react-markdown 那样注册替代渲染方法。
+
+但是上述实现也有一个坑，那就是作为一个 Yew Component，传递给 `MarkdownElement` 的参数不能是引用，因此可以看到上述示例中有一个明显的 `block_quote.children.clone()`，这就导致抽象语法树中深度为 n 的节点将被复制 n 次。但是过了很久之后我突然想到，一开始做上述的设计主要是为了每一个 markdown 语法树节点成为一个 Yew Component，这样可以做局部更新。但是实际上在当前场景下并不可能在运行时修改抽象语法树，更不可能需要局部更新，因此整个渲染只需要在一个组件内，递归调用一个返回 Html 对象的函数即可，因此就得到了：
+```rust
+fn markdown_element(props: &Vec<Node>) -> Html {
+  html! {
+    { for props.iter().map(|child| match child {
+      Node::Root(root) => markdown_element(&root.children),
+      Node::BlockQuote(block_quote) => html! {
+        <blockquote>{markdown_element(&block_quote.children)}</blockquote>
+      },
+      /* other kinds... */
+    })}
+  }
+}
+```
+这样在每次渲染 markdown 语法树时，只能渲染全部的内容，但很好地避免了多余的节点复制。
+> 实际上即使不受 Rust 的严格限制，在 React 当中做类似的事情仍然不容易，因为想要 markdown 组件能部分更新，每个组件的 props 就应该是 state，这实际上与 Rust 当中要求所有权是相同的道理，想要触发 React 的更新就要构造新的对象，这样上述的复制仍然难以避免。
+
 ## 代码块高亮
 代码块高亮算是一个相对比较重要的 feature，因为我写的博客应该每一篇都会用到，但是在 Rust 当中没有找到适当的工具实现，最终找到一个比较简单的库是 [Prism](https://prismjs.com/)，这个库对框架的耦合很小，只要引入对应的 JS 和 CSS 文件，给代码块添加对应语言的 class 即可，例如：
 ```html
