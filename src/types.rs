@@ -68,6 +68,7 @@ impl Category {
 #[serde(rename_all = "PascalCase")]
 pub enum Tag {
   Blog,
+  Router,
   Rust,
   Yew,
 }
@@ -79,6 +80,7 @@ impl Display for Tag {
       "{}",
       match self {
         Tag::Blog => "Blog",
+        Tag::Router => "Router",
         Tag::Rust => "Rust",
         Tag::Yew => "Yew",
       }
@@ -92,6 +94,7 @@ impl FromStr for Tag {
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     match s {
       "Blog" => Ok(Self::Blog),
+      "Router" => Ok(Self::Router),
       "Rust" => Ok(Self::Rust),
       "Yew" => Ok(Self::Yew),
       _ => Err(()),
@@ -101,7 +104,7 @@ impl FromStr for Tag {
 
 impl Tag {
   pub fn values() -> Vec<Self> {
-    vec![Self::Blog, Self::Rust, Self::Yew]
+    vec![Self::Blog, Self::Router, Self::Rust, Self::Yew]
   }
 }
 

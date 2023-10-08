@@ -148,7 +148,7 @@ pub fn markdown_component(props: &MarkdownProps) -> Html {
 ### 我在 Rust 项目中学习 React
 我原本一直以为 `useEffect` 是在加载 DOM 之前执行的，虽然现在仔细想想好像这样实现起来不是很合理，但直到我这里遇到需要确保副作用在 DOM 加载之后才运行的时候，我才去认真看了文档，发现 React 文档如此描述：
 > The function with your Effect’s logic. Your setup function may also optionally return a cleanup function. **When your component is added to the DOM, React will run your setup function.**
->## 简单的分页
+## 简单的分页
 虽然现在的博客数量还远远没有必要实现分页，但是为了美观起见还是要加一个。在第一个版本中就添加了分页的预处理，将所有的博文信息每 10 篇作为一页存储在一个 JSON 文件中，博文列表页根据页码获取对应的信息做展示。因此只需要增加一个接受 `page` 和 `set_page` 的分页器组件，修改父组件的页码即可，从 antd 里抄了一点 CSS，不算太难看就行了。
 
 这部分实现好之后就可以将博文列表组件进行微调，使得这个组件可以用于所有博文、根据分类或标签筛选博文这两种场景。
