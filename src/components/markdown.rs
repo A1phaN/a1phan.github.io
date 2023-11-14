@@ -30,7 +30,7 @@ fn markdown_element(props: &Vec<Node>) -> Html {
       Node::MdxTextExpression(_) => html! {},
       Node::FootnoteReference(_) => html! {},
       Node::Html(htm) => html! { <div innerHTML={htm.value.clone()} /> },
-      Node::Image(image) => html! { <img src={image.url.clone()} alt={image.alt.clone()} /> },
+      Node::Image(image) => html! { <img src={image.url.clone()} alt={image.alt.clone()} style="max-width: 100%" /> },
       Node::ImageReference(_) => html! {},
       Node::MdxJsxTextElement(_) => html! {},
       Node::Link(link) => match Route::recognize(&link.url).unwrap() {

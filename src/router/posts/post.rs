@@ -11,13 +11,17 @@ pub struct PostProps {
 pub fn post(props: &PostProps) -> Html {
   let content = use_state_eq(String::new);
   {
-    let path = props.path.clone();
+    let path = if props.path.ends_with(".md") {
+      format!("/post/{}", props.path)
+    } else {
+      format!("/post/{}.md", props.path)
+    };
     let content = content.clone();
     use_effect_with_deps(
       move |_| {
         let content = content.clone();
         wasm_bindgen_futures::spawn_local(async move {
-          let res: String = Request::get(&format!("/post/{}.md", &path))
+          let res: String = Request::get(&path)
             .send()
             .await
             .unwrap()

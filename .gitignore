@@ -3,3 +3,4 @@
 /meta/*
 !/meta/.keep
 /target
+.DS_Store
