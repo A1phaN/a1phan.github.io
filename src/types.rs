@@ -1,9 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{
-  collections::HashMap,
-  fmt::Display,
-  str::FromStr,
-};
+use std::collections::HashMap;
 
 macro_rules! create_enum {
   ($name:ident, $($variant:ident),*) => {
@@ -59,16 +55,7 @@ impl Default for Category {
   }
 }
 
-create_enum!(
-  Tag,
-  Blog,
-  Linux,
-  Network,
-  Router,
-  Rust,
-  Swift,
-  Yew
-);
+create_enum!(Tag, Blog, Linux, Network, Router, Rust, Swift, Yew);
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct PostMeta {
