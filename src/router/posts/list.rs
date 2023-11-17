@@ -51,36 +51,42 @@ pub fn post_list(props: &PostListProps) -> Html {
 
   html! {
     <div>
-      <div class={classes!("post-list")}>
-        <ul class={classes!("post-list-items")}>
+      <div class="post-list">
+        <ul class="post-list-items">
           { for post_list.iter().map(|post| {
             html! {
               <li
-                class={classes!("post-list-item")}
+                class="post-list-item"
                 onclick={navigate_to(Route::Post { path: post.path.clone() })}
               >
                 <h4>{ post.title.clone() }</h4>
-                <div>
-                  {
-                    format!(
-                      "发表于: {} | 更新于: {} | 字数: {} | 分类: ",
-                      Local.timestamp_opt(post.create as i64, 0).unwrap().format("%Y-%m-%d").to_string(),
-                      Local.timestamp_opt(post.modify as i64, 0).unwrap().format("%Y-%m-%d").to_string(),
-                      post.length,
-                    )
-                  }
-                  <a onclick={navigate_to(Route::Category { category: post.meta.category })}>
-                    { format!("{}", post.meta.category) }
-                  </a>
+                <div style="display: flex">
+                  <span style="width: 160px">
+                    { format!("发表于: {}", Local.timestamp_opt(post.create as i64, 0).unwrap().format("%Y-%m-%d").to_string()) }
+                  </span>
+                  <span style="width: 160px">
+                    { format!("更新于: {}", Local.timestamp_opt(post.modify as i64, 0).unwrap().format("%Y-%m-%d").to_string()) }
+                  </span>
+                  <span style="width: 90px">
+                    { format!("字数: {}", post.length) }
+                  </span>
+                  <span style="width: 135px">
+                    { "分类: " }
+                    <a onclick={navigate_to(Route::Category { category: post.meta.category })}>
+                      { format!("{}", post.meta.category) }
+                    </a>
+                  </span>
                   if post.meta.tags.len() > 0 {
-                    { " | 标签:" }
-                    { for post.meta.tags.iter().map(|tag| {
-                      html! {
-                        <a onclick={navigate_to(Route::Tag { tag: tag.clone() })}>
-                          { format!(" {} ", tag) }
-                        </a>
-                      }
-                    })}
+                    <span>
+                      { "标签: " }
+                      { for post.meta.tags.iter().map(|tag| {
+                        html! {
+                          <a onclick={navigate_to(Route::Tag { tag: tag.clone() })}>
+                            { format!(" {} ", tag) }
+                          </a>
+                        }
+                      })}
+                    </span>
                   }
                 </div>
                 // TODO: Thumb
@@ -89,7 +95,7 @@ pub fn post_list(props: &PostListProps) -> Html {
           })}
         </ul>
       </div>
-      <div class={classes!("post-list-pagination")}>
+      <div class="post-list-pagination">
         <Paginator page={*page} total={props.page} {set_page} />
       </div>
     </div>

@@ -91,7 +91,7 @@ fn main() -> Result<()> {
       }
     })
     .collect::<Vec<_>>();
-  posts.sort_by_key(|post| post.create);
+  posts.sort_by_key(|post| usize::MAX - post.create);
   let mut meta = BuildMeta {
     timestamp: Local::now().timestamp(),
     post: posts.len(),

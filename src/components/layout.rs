@@ -38,9 +38,9 @@ pub struct LayoutProps {
 #[function_component(Layout)]
 pub fn layout(props: &LayoutProps) -> Html {
   html! {
-    <section class={classes!("layout")}>
-      <header class={classes!("header")}>
-        <ul class={classes!("navbar")}>
+    <section class="layout">
+      <header class="header">
+        <ul class="navbar">
           <NavbarItem
             active={matches!(props.active, Route::Home)}
             label="Home"

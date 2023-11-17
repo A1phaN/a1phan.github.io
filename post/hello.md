@@ -30,7 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Install Trunk
@@ -51,6 +53,9 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v2
 ```
+
+> ### 博文创建和修改时间的 bug
+> 这个 bug 在上一版本的 blog 中也有，每次更新之后所有的 blog 的创建和修改时间都会变成最新一次的 commit 时间，但是我一直没找到原因。今天终于发现问题出现在 `actions/checkout`，这个 action 并不会 clone 整个 repo，而是只获取了单个版本记录，因此需要添加一句 `fetch-depth: 0` 获取完整的 git 记录。
 
 比 Node.js 好的一点是，我可以写一个单独的可执行程序（`src/bin/generate_index.rs`）来完成必要的预处理工作，这比上一个版本中执行 `node generate_index.js` 看起来要优雅一些，而且便于与博客的其他部分共用类型定义等内容。
 
