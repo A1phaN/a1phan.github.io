@@ -104,12 +104,12 @@ pub fn markdown_component(props: &MarkdownProps) -> Html {
   {
     let mdast = mdast.clone();
     let content = props.content.clone();
-    use_effect_with_deps(
+    use_effect_with(
+      content.clone(),
       move |_| {
         let ast = markdown::to_mdast(&content, &parse_options()).unwrap();
         mdast.set(ast);
       },
-      props.content.clone(),
     );
   }
   use_effect(|| {

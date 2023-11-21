@@ -12,7 +12,8 @@ pub fn meta_provider(props: &MetaProviderProps) -> Html {
   let meta = use_state_eq(BuildMeta::default);
   {
     let meta = meta.clone();
-    use_effect_with_deps(
+    use_effect_with(
+      (),
       move |_| {
         let meta = meta.clone();
         wasm_bindgen_futures::spawn_local(async move {
@@ -26,7 +27,6 @@ pub fn meta_provider(props: &MetaProviderProps) -> Html {
           meta.set(fetched_meta);
         })
       },
-      (),
     );
   }
 

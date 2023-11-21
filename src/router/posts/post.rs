@@ -17,7 +17,8 @@ pub fn post(props: &PostProps) -> Html {
       format!("/post/{}.md", props.path)
     };
     let content = content.clone();
-    use_effect_with_deps(
+    use_effect_with(
+      path.clone(),
       move |_| {
         let content = content.clone();
         wasm_bindgen_futures::spawn_local(async move {
@@ -31,7 +32,6 @@ pub fn post(props: &PostProps) -> Html {
           content.set(res);
         });
       },
-      props.path.clone(),
     );
   }
 

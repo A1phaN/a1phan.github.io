@@ -16,14 +16,15 @@ pub fn post_list(props: &PostListProps) -> Html {
   // TODO: Add post list cache
   let post_list = use_state_eq(|| vec![]);
   {
-    let p = page.clone();
-    let path = props.path.to_string();
+    let page = *page;
+    let path = props.path.clone();
     let post_list = post_list.clone();
-    use_effect_with_deps(
+    use_effect_with(
+      (page, path.clone()),
       move |_| {
         let post_list = post_list.clone();
         wasm_bindgen_futures::spawn_local(async move {
-          let list: Vec<blog::types::Post> = Request::get(&format!("/meta{}{}.json", path, *p))
+          let list: Vec<blog::types::Post> = Request::get(&format!("/meta{}{}.json", path, page))
             .send()
             .await
             .unwrap()
@@ -33,7 +34,6 @@ pub fn post_list(props: &PostListProps) -> Html {
           post_list.set(list);
         });
       },
-      (*page, props.path.clone()),
     );
   }
   let navigator = use_navigator().unwrap();

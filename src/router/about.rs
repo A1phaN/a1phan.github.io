@@ -5,7 +5,12 @@ pub fn about() -> Html {
   html! {
     <>
       <h1>{ "About" }</h1>
-      <h2>{ "安一帆" }</h2>
+      <h2 style="margin-bottom: 15px;">{ "安一帆" }</h2>
+      <div>
+        <a href="mailto:me@anyi.fan">{ "Email" }</a>
+        { " | " }
+        <a href="https://github.com/A1phaN">{ "GitHub" }</a>
+      </div>
       <h3>{ "简介" }</h3>
       <p>
         { "清华大学计算机科学与技术系本科在读，坚定的" }
