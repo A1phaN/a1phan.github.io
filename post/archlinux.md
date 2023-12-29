@@ -81,7 +81,7 @@ sudo dd bs=4M if=archlinux-2023.09.01-x86_64.iso of=/dev/disk8 conv=fsync oflag=
    pacstrap -K /mnt base linux linux-firmware # 这里可能需要 dhcpcd
    # 如果需要连接校园网可以提前下载 auth-thu
    curl https://github.com/z4yx/GoAuthing/releases/download/v2.2.1/auth-thu.linux.x86_64 -o /usr/local/bin/auth-thu
-   curl https://raw.githubusercontent.com/z4yx/GoAuthing/master/docs/goauthing%40.service -o /usr/lib/systemd/system/goauthing@.service
+   curl https://raw.githubusercontent.com/z4yx/GoAuthing/master/docs/systemd/user/goauthing.service -o /usr/lib/systemd/system/goauthing@.service
    ```
 6. 配置系统：
    1. 配置 fstab：
@@ -110,9 +110,9 @@ sudo dd bs=4M if=archlinux-2023.09.01-x86_64.iso of=/dev/disk8 conv=fsync oflag=
    5. 设置主机名，这里我使用 `router`：
       ```bash
       echo 'router' > /etc/hostname
-      echo -e '127.0.0.1\trouter' > /etc/hosts
-      echo -e '::1\trouter' > /etc/hosts
-      echo -e '127.0.1.1\trouter.localdomain router' > /etc/hosts
+      echo -e '127.0.0.1\tlocalhost' >> /etc/hosts
+      echo -e '::1\tlocalhost' >> /etc/hosts
+      echo -e '127.0.1.1\trouter.localdomain router' >> /etc/hosts
       ```
    6. 设置 root 密码：
       ```bash
@@ -159,12 +159,12 @@ systemctl enable --now goauthing@root.service
 ## 配置系统
 联网后安装一些必要的软件：
 ```bash
-pacman -S bind htop git iwd less man openssh sudo tmux unzip vim wget wireguard-tools zsh
+pacman -S htop git iwd less man openssh sudo tmux unzip vim wget wireguard-tools zsh
 ```
 
 ### 添加日常使用的用户
 ```bash
-# 取消注释 %whell ALL=(ALL:ALL) ALL
+# 取消注释 %wheel ALL=(ALL:ALL) ALL
 EDITOR=/usr/bin/vim visudo
 # 添加新用户
 useradd -m -G wheel -s /usr/bin/zsh user_name

@@ -153,18 +153,64 @@ sudo systemctl restart xray
 
 ## 配置子网
 ### 有线和无线子网
-我的路由器上有四个 2.5G RJ45 网口，我选择使用 LAN 4 作为 WAN 口，这四个接口默认的名称依次是 `enp1s0` `enp2s0` `enp3s0` `enp4s0`。为了方便起见，
+我的路由器上有四个 2.5G RJ45 网口，我选择使用 LAN 4 作为 WAN 口，这四个接口默认的名称依次是 `enp1s0` `enp2s0` `enp3s0` `enp4s0`。为了方便起见，使用 systemd networkd 对这几个接口重命名，分别命名为 `wan` `lan2` `lan3` `lan4`。以 `wan` 为例：
+```ini
+# /etc/systemd/network/10-wan.link
+[Match]
+MACAddress=00:00:00:00:00:00
 
-按照 [ArchWiki](https://wiki.archlinux.org/title/Router#IP_configuration) 的说明，可以通过 netctl 或 systemd-networkd 完成下一步配置，关于这两个工具的对比，GPT-4 给出的评价是：
-```text
-If you're familiar with systemd and prefer tools that are part of the systemd ecosystem, or if you're setting up a system that you want to be lightweight and efficient (e.g., a server, router, or embedded system), then systemd-networkd might be the better choice.
+[Link]
+Description=WAN
+Name=wan
+```
 
-If you like the idea of easily switchable profiles, especially for a mobile device or if you're more comfortable with Arch-specific tools, then netctl could be the way to go.
+#### 子网配置
+通过 systemd networkd 分别配置 `wan` 和 `lan*`。`wan` 口使用 DHCP 获取 IP：
+```ini
+# /etc/systemd/network/20-wan.network
+[Match]
+Name=wan
+
+[Network]
+DHCP=yes
 ```
-考虑到我最近应该不会配其他的非 ArchLinux 的路由器，我决定首先尝试使用 netctl 解决问题：
-```bash
-sudo pacman -S netctl
+
+`lan*` 口为静态 IP 地址，并将通过 `lan*` 口传来的数据视为从本地发出的请求：
+```ini
+# /etc/systemd/network/20-lan2.network
+[Match]
+Name=lan2
+
+[Network]
+Address=10.0.0.1/25
+IPMasquerade=both
 ```
+
+重启应用变更（对于 `.link` 配置需要重启，如果只修改了 `.network` 配置可以通过 `systemctl daemon-reload` 和 `networkctl reload` 重新加载）。
+
+#### DNS 和 DHCP 配置
+关于不同 DHCP 服务器工具的对比可以参考 [Router ArchWiki](https://wiki.archlinux.org/title/Router#DNS_and_DHCP) 中这一部分的内容。这里我选择使用 `dnsmasq`。修改配置文件 `/etc/dnsmasq.conf`：
+- 添加 `interface=lan2` `interface=lan3` `interface=lan4`
+- 添加 `dhcp-range=10.0.0.2,10.0.0.127,255.255.255.128,12h`
+
+至此可以通过网线连接 LAN 口拿到子网 IP 并顺利上网。
+
+#### 插曲：配置 802.1x 认证的网络
+通过 wpa_supplicant 实现 802.1x 认证，配置文件如下：
+```
+# /etc/wpa_supplicant/wpa_supplicant-wired-wan.conf
+ctrl_interface=/run/wpa_supplicant
+
+network={
+    key_mgmt=IEEE8021X
+    eap=PEAP
+    identity="your_username"
+    password="your_password"
+    phase2="auth=MSCHAPV2"
+}
+```
+
+其中 `eap` 和 `phase2` 的内容可能需要根据网络设置，我这里通过我的 Mac 联网后得到了这两个值。
 
 ### WireGuard 子网
 按照总体设计，WireGuard 子网的 IP 段是 `10.0.0.128/25`，因此有如下配置
