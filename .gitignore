@@ -1,6 +1,6 @@
 /.idea
 /dist
 /meta/*
-!/meta/.keep
+!/meta/.gitkeep
 /target
 .DS_Store

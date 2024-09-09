@@ -4,7 +4,6 @@ use std::collections::HashMap;
 macro_rules! create_enum {
   ($name:ident, $($variant:ident),*) => {
     #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Serialize, PartialEq)]
-    #[serde(rename_all = "PascalCase")]
     pub enum $name {
       $($variant),*
     }
@@ -55,7 +54,17 @@ impl Default for Category {
   }
 }
 
-create_enum!(Tag, Blog, Linux, Network, Router, Rust, Swift, Yew);
+create_enum!(
+  Tag,
+  Blog,
+  Linux,
+  Network,
+  NodeJS,
+  Router,
+  Rust,
+  Swift,
+  Yew
+);
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct PostMeta {

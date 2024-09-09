@@ -61,6 +61,9 @@ sudo dd bs=4M if=archlinux-2023.09.01-x86_64.iso of=/dev/disk8 conv=fsync oflag=
       ```bash
       mkfs.ext4 /dev/sda2
       ```
+   > 这里实际上可以不分为两个分区，后续直接把 `/boot` 和其他内容放在一个分区也没有关系。
+   > 
+   > 如果使用 BIOS，则需要一个 1M 或 2M 大小的分区在起始位置，不进行格式化，后续也不挂载这个分区。
 4. 挂载硬盘：
    ```bash
    mount /dev/sda2 /mnt
@@ -79,9 +82,11 @@ sudo dd bs=4M if=archlinux-2023.09.01-x86_64.iso of=/dev/disk8 conv=fsync oflag=
    安装基本包：
    ```bash
    pacstrap -K /mnt base linux linux-firmware # 这里可能需要 dhcpcd
+   # 如果遇到 Signature from XXX is unknown trust，可以先尝试更新 archlinux-keyring
+   pacman -Sy archlinux-keyring
    # 如果需要连接校园网可以提前下载 auth-thu
    curl https://github.com/z4yx/GoAuthing/releases/download/v2.2.1/auth-thu.linux.x86_64 -o /usr/local/bin/auth-thu
-   curl https://raw.githubusercontent.com/z4yx/GoAuthing/master/docs/systemd/user/goauthing.service -o /usr/lib/systemd/system/goauthing@.service
+   curl https://raw.githubusercontent.com/z4yx/GoAuthing/master/docs/systemd/user/goauthing.service -o                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                goauthing@.service
    ```
 6. 配置系统：
    1. 配置 fstab：
@@ -126,6 +131,7 @@ sudo dd bs=4M if=archlinux-2023.09.01-x86_64.iso of=/dev/disk8 conv=fsync oflag=
       ```bash
       pacman -S grub efibootmgr
       grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub
+      # 对于 BIOS，使用 grub-install --target=i386-pc /dev/sda
       grub-mkconfig -o /boot/grub/grub.cfg
       ```
    9. 重新启动：
@@ -159,7 +165,7 @@ systemctl enable --now goauthing@root.service
 ## 配置系统
 联网后安装一些必要的软件：
 ```bash
-pacman -S htop git iwd less man openssh sudo tmux unzip vim wget wireguard-tools zsh
+pacman -S htop git iw iwd less man openssh sudo tmux unzip vim wget wireguard-tools zip zsh
 ```
 
 ### 添加日常使用的用户
@@ -185,6 +191,18 @@ sudo vim /etc/ssh/sshd_config
 sudo systemctl enable --now sshd
 ```
 
+### 安装 Yay
+```bash
+sudo pacman -S base-devel
+cd /opt
+sudo git clone https://aur.archlinux.org/yay.git
+sudo chown -R `whoami`:users yay
+cd yay
+# 这里有个问题，阿里的 Go 镜像提供的 golang.org/x/sys/unix@v0.10.0 是损坏的，会导致编译失败
+# 可以使用 GOPROXY=https://goproxy.cn
+makepkg -si
+```
+
 ### 配置 Zsh
 在上面创建用户时我指定了 `/usr/bin/zsh` 作为默认 shell，但并未进行配置，简单起见使用 oh-my-zsh 配置：
 ```bash
@@ -194,7 +212,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 ### 安装 KDE
 本来对于路由器其实可以没有图形界面，但是后面操作 Qemu 的时候没有图形界面就有些复杂，因此还是准备装一个 KDE：
 ```bash
-sudo pacman -S plasma-meta plasma-wayland-session sddm
+sudo pacman -S plasma-meta sddm
 sudo systemctl enable --now sddm.service
 ```
 
